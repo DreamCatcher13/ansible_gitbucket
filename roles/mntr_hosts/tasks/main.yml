@@ -1,0 +1,101 @@
+---
+ - name: create zabbix host  for gitbucket
+   zabbix_host:
+     server_url: "{{ url }}" 
+     login_user: "{{ user }}"
+     login_password: "{{ pass }}"
+     host_name: "{{ item.name }}"
+     host_groups:
+       - 'Linux servers'
+     link_templates:
+       - 'Template OS Linux by Zabbix agent'
+       - 'Template App Apache Tomcat JMX'
+     status: enabled
+     state: present
+     interfaces: 
+       - type: 1
+         main: 1
+         useip: 1
+         ip: "{{ item.ip }}"
+         dns: ""
+         port: "10050"
+       - type: 4
+         main: 1
+         useip: 1
+         ip: "{{ item.ip }}"
+         dns: ""
+         port: "12345"  
+   loop:
+     - "{{ app1 }}"
+     - "{{ app2 }}"
+
+ - name: create zabbix host for the rest
+   zabbix_host:
+     server_url: "{{ url }}" 
+     login_user: "{{ user }}"
+     login_password: "{{ pass }}"
+     host_name: "{{ item.name }}"
+     host_groups:
+       - 'Linux servers'
+     link_templates:
+       - 'Template OS Linux by Zabbix agent'
+     status: enabled
+     state: present
+     interfaces: 
+       - type: 1
+         main: 1
+         useip: 1
+         ip: "{{ item.ip }}"
+         dns: ""
+         port: "10050"
+   loop:
+     - "{{ db }}"
+     - "{{ lb }}"
+     - "{{ nfs }}"
+
+ - name: create macro url
+   community.zabbix.zabbix_globalmacro:
+     server_url: "{{ url }}"
+     login_user: "{{ user }}"
+     login_password: "{{ pass }}"
+     macro_name: ZABBIX.URL
+     macro_value: "http://{{ hostvars['zabbix']['ansible_host'] }}"
+     macro_description: for alerts
+     state: present
+
+ - name: create action
+   community.zabbix.zabbix_action:
+     server_url: "{{ url }}"
+     login_user: "{{ user }}"
+     login_password: "{{ pass }}"
+     name: "send alerts to Admin"
+     event_source: "trigger"
+     state: present
+     status: enabled
+     esc_period: 60
+     conditions:
+       - type: "trigger_severity"
+         operator: ">="
+         value: "Information"
+     operations:    
+       - type: send_message
+         message: "something bad is happening"
+         media_type: "Discord"
+         send_to_users:
+           - 'Admin'
+
+ - name: add discord to admin media
+   community.zabbix.zabbix_user:
+     server_url: "{{ url }}"
+     login_user: "{{ user }}"
+     login_password: "{{ pass }}"
+     username: "{{ user }}"
+     passwd: "{{ pass }}"
+     usrgrps:
+       - Zabbix administrators
+     user_medias:
+       - mediatype: "Discord"
+         sendto: "{{ hook }}"
+ 
+
+# tasks file for add_hosts

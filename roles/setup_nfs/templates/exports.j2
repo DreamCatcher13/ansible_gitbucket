@@ -1,0 +1,5 @@
+#shared directory
+
+{% for hosts in groups['app'] %}
+/gitbucket {{ hostvars[hosts]['ansible_host'] }}(rw,sync,no_root_squash)
+{% endfor %}

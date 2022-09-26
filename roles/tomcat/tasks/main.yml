@@ -1,0 +1,70 @@
+---
+ - name: install java
+   yum:
+     name: java-1.8.0-openjdk-devel
+     state: present
+
+ - name: add group
+   group:
+     name: tomcat
+
+ - name: add user
+   user:
+     name: tomcat
+     group: tomcat
+     home: /opt/tomcat
+     create_home: no
+     system: yes
+
+ - name: download tomcat
+   get_url:
+     url: "{{ url }}"
+     dest: /tmp/tomcat.tar.gz
+
+ - name: mkdir for tomcat
+   file:
+     path: /opt/tomcat
+     state: directory
+     owner: tomcat
+     group: tomcat
+
+ - name: extract archive
+   unarchive:
+     src: /tmp/tomcat.tar.gz
+     dest: /opt/tomcat
+     owner: tomcat
+     group: tomcat
+     remote_src: yes
+     extra_opts: "--strip-components=1"
+     creates: /opt/tomcat/bin
+
+ - name: copy service file
+   template:
+     src: tomcat.service.j2
+     dest: /etc/systemd/system/tomcat.service
+
+ - name: copy tomcat server config
+   template:
+     src: server.xml.j2
+     dest: /opt/tomcat/conf/server.xml
+     owner: tomcat 
+     group: tomcat
+     mode: 0650
+
+ - name: start tomcat
+   service:
+     daemon-reload: yes
+     name: tomcat
+     state: started
+     enabled: yes
+
+ - name: firewall open port
+   firewalld:
+     port: 8080/tcp
+     permanent: true
+     zone: public
+     state: enabled
+     immediate: yes
+     
+
+# tasks file for tomcat

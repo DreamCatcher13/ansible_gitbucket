@@ -1,0 +1,27 @@
+---
+ - name: install additional pckgs
+   yum:
+     name: ['MySQL-python', 'epel-release']
+     state: present
+
+ - name: install mariadb
+   yum:
+     name: mariadb-server
+     state: present
+
+ - name: start mariadb
+   service:
+     name: mariadb
+     state: started
+     enabled: yes
+ 
+ - name: conf firewall
+   firewalld:
+     service: mysql
+     permanent: yes
+     state: enabled
+     immediate: yes
+
+
+
+# tasks file for setup_mdb

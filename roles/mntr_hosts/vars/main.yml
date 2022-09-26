@@ -1,0 +1,22 @@
+---
+ url: "http://{{ hostvars['zabbix']['ansible_host'] }}/zabbix"
+ user: Admin
+ pass: zabbix
+ app1:
+   name: app1
+   ip: "{{ hostvars['app1']['ansible_host'] }}"
+ app2:
+   name: app2
+   ip: "{{ hostvars['app2']['ansible_host'] }}"
+ lb:   
+   name: balancer
+   ip: "{{ hostvars['balancer']['ansible_host'] }}"
+ db:
+   name: postgres
+   ip: "{{ hostvars['postgres']['ansible_host']  }}"
+ nfs:
+   name: fileshare
+   ip: "{{ hostvars['fileshare']['ansible_host'] }}"     
+ hook: "https://discord.com/api/webhooks/1019896246451839027/ouc8PUbbklZyKm3iSqKq-Kur_pns68_7CW90_aS3q5vLED6OufT68XajX5AnlDnOADEZ"
+
+# vars file for add_hosts

@@ -1,0 +1,45 @@
+---
+ - name: install nfs-utils
+   yum:
+     name: nfs-utils
+     state: present
+
+ - name: create directory
+   file:
+     path: /gitbucket
+     state: directory
+     mode: 0777
+
+ - name: enable service
+   service:
+     name: "{{ item }}"
+     state: started
+     enabled: yes
+   loop:
+     - nfs-server
+     - rpcbind
+
+ - name: add service
+   firewalld:
+     service: "{{ item }}"
+     permanent: yes
+     zone: public
+     state: enabled
+     immediate: true
+   loop:
+     - mountd
+     - rpc-bind
+     - nfs
+
+ - name: add exports
+   template:
+     src: exports.j2
+     dest: /etc/exports 
+   register: result
+
+ - name: export share
+   shell: "exportfs -r"
+   notify: restart nfs-server
+   when: result.changed
+   
+# tasks file for setup_nfs

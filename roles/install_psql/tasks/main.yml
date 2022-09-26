@@ -1,0 +1,35 @@
+---
+ - name: install postgresql and additional python pckg
+   yum: 
+     name: ['postgresql', 'postgresql-server', 'python-psycopg2']  
+     state: present
+ 
+ - name: if psql initialized
+   stat:
+     path: "/var/lib/pgsql/data/pg_hba.conf"
+   register: result
+
+ - name: init pgsql
+   shell: "postgresql-setup initdb"
+   when: not result.stat.exists
+
+ - name: open port
+   firewalld:
+     port: 5432/tcp
+     permanent: yes
+     zone: public
+     state: enabled
+
+ - name: add service
+   firewalld:
+     service: postgresql
+     permanent: yes
+     zone: public
+     state: enabled
+     immediate: true
+
+ - name: start db
+   service:
+     name: postgresql
+     state: started
+     enabled: yes

@@ -1,0 +1,138 @@
+---
+ - name: install semanage
+   yum:
+     name: libsemanage-python
+     state: present
+
+ - name: selinux disable
+   selinux:
+     state: disabled
+
+ - name: reboot
+   reboot:
+     msg: "reboot initiated by ansible"
+
+ - name: install pckgs
+   yum:
+     name: ['httpd', 'epel-release', 'mariadb-server', 'MySQL-python']
+     state: present
+
+ - name: start httpd
+   service: 
+     name: httpd
+     state: started
+     enabled: yes
+ 
+ - name: start mariadb
+   service: 
+     name: mariadb
+     state: started
+     enabled: yes
+
+ - name: keys
+   rpm_key:
+     key: http://rpms.remirepo.net/RPM-GPG-KEY-remi
+     state: present
+
+ - name: install remi repo
+   yum: 
+     name: 'http://rpms.famillecollet.com/enterprise/remi-release-7.rpm'  
+     state: present
+
+ - name: install php*
+   yum:
+     name: ['php', 'php-pear', 'php-cgi', 'php-common', 'php-mbstring', 'php-snmp', 'php-gd', 'php-pecl-mysql', 'php-xml', 'php-mysql', 'php-gettext', 'php-bcmath', 'php-cli']
+     disablerepo: remi-php54
+     enablerepo: remi-php72   
+ 
+ - name: set timezone php.ini
+   lineinfile:
+     path: /etc/php.ini
+     regex: "^;date.timezone.*"
+     line: "date.timezone = Europe/UTC"
+     state: present
+     backup: yes
+ 
+ - name: enable firewall service
+   firewalld:
+     service: "{{ item }}"
+     permanent: yes
+     state: enabled
+     immediate: yes
+   loop:
+     - http
+     - https
+     - mysql
+
+ - name: enable firewall port
+   firewalld: 
+     port: "{{ item }}"
+     permanent: yes
+     zone: public
+     state: enabled
+     immediate: yes
+   loop:
+     - 10050/tcp
+     - 10051/tcp
+     - 10052/tcp    
+    
+ - name: zabbix key
+   rpm_key:
+     key: https://repo.zabbix.com/RPM-GPG-KEY-ZABBIX
+     state: present
+
+ - name: zabbix repo
+   yum: 
+     name: "https://repo.zabbix.com/zabbix/5.0/rhel/7/x86_64/zabbix-release-5.0-1.el7.noarch.rpm"
+     state: present       
+
+ - name: zabbix pckgs
+   yum:
+     name: ['zabbix-server-mysql', 'zabbix-agent', 'centos-release-scl', 'zabbix-java-gateway']
+     state: present
+
+ - name: enable frontend repo 
+   lineinfile:
+     path: /etc/yum.repos.d/zabbix.repo
+     regex: "^enabled=0"
+     firstmatch: yes
+     line: "enabled=1"
+     state: present
+     backup: yes
+ 
+ - name: install zbb frontend
+   yum:
+     name: ['zabbix-web-mysql-scl', 'zabbix-apache-conf-scl']
+     state: present
+
+ - name: config zabbix server
+   template: 
+     src: zabbix_server.conf.j2
+     dest: /etc/zabbix/zabbix_server.conf
+
+ - name: zabbix php timezone
+   lineinfile:
+     path: /etc/opt/rh/rh-php72/php-fpm.d/zabbix.conf
+     regex: "^;php_value[date.timezone].*"
+     line: "php_value[date.timezone] = UTC"
+     state: present
+ 
+ - name: config zabbix web
+   template:
+     src: zabbix.conf.php.j2
+     dest: /etc/zabbix/web/zabbix.conf.php
+
+ - name: start all services
+   service:
+     name: "{{ item }}"
+     state: restarted
+     enabled: yes
+   loop:
+     - zabbix-server
+     - zabbix-agent
+     - zabbix-java-gateway
+     - httpd
+     - rh-php72-php-fpm
+
+
+# tasks file for zbb_server
