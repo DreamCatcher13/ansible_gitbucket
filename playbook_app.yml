@@ -1,0 +1,60 @@
+---
+ - name: setup db server
+   hosts: db
+   become: yes
+   roles:
+     - install_psql
+     - conf_psql
+
+ - name: setup nfs server
+   hosts: nfs
+   become: yes
+   roles:
+    - setup_nfs
+
+ - name: setup web-app servers
+   hosts: app
+   become: yes
+   roles:
+     - conf_apps_nfs
+     - tomcat
+     - gitbucket
+
+ - name: setup load balancer
+   hosts: lb
+   become: yes
+   roles:
+     - balancer
+ 
+ - name: fix db access for app2
+   hosts: bucket 
+   become: yes
+   roles:    
+     - fix_db
+ 
+ - name: db for zabbix
+   hosts:  zdb
+   become: yes
+   roles:
+     - setup_mdb
+     - conf_mdb
+
+ - name: install zabbix
+   hosts: zbbx
+   become: yes
+   roles:
+     - zbb_server
+
+  - name: install agents
+    hosts: monitoring
+    become: yes
+    roles:   
+      - zbbx_agent
+
+  - name: monitoring config
+    hosts: localhost
+    collections:
+      - community.zabbix
+    roles:
+      - mntr_hosts
+

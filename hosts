@@ -1,0 +1,28 @@
+[app]
+app1 ansible_host=10.26.0.74
+app2 ansible_host=10.26.0.93
+
+[nfs]
+fileshare ansible_host=10.26.0.87
+
+[db]
+postgres ansible_host=10.26.0.107
+
+[lb]
+balancer ansible_host=10.26.0.75
+
+[zdb]
+mariadb ansible_host=10.26.0.90
+
+[zbbx]
+zabbix ansible_host=10.26.0.70
+
+[bucket:children]
+db
+app
+
+[monitoring:children]
+app
+db
+nfs
+lb
