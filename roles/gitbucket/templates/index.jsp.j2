@@ -1,0 +1,12 @@
+<%@ page language="java" pageEncoding="UTF-8" contentType="text/html; charset=UTF-8" %>
+<html>
+  <head>
+    <title>JSP redirect</title>
+  </head>
+  <body>
+    <%
+       String redirectURL = "http://{{ hostvars[inventory_hostname]['ansible_host'] }}:8080/gitbucket";
+       response.sendRedirect(redirectURL);
+    %>
+  </body>
+</html>

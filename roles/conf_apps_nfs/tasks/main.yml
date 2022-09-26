@@ -1,0 +1,21 @@
+---
+ - name: install nfs-utils
+   yum:
+     name: nfs-utils
+     state: present
+
+ - name: mkdir gitbucket
+   file:
+     path: /mnt/gitbucket
+     state: directory
+     mode: 0777
+ 
+ - name: mounting fileshare
+   mount:
+     src: "{{ ip_addr }}:/gitbucket"
+     path: /mnt/gitbucket
+     opts: nosuid,rw,sync,hard,intr
+     state: mounted
+     fstype: nfs
+
+# tasks file for conf_apps

@@ -1,0 +1,23 @@
+<Proxy balancer://mycluster >
+   {% for hosts in groups['app'] %}
+	BalancerMember http://{{ hostvars[hosts]['ansible_host'] }}:8080 route={{ hostvars[hosts]['jvm'] }} 
+   {% endfor %}
+	ProxySet lbmethod=bytraffic
+	ProxySet stickysession=JSESSIONID
+</Proxy>
+
+<Location /balancer-manager >
+	SetHandler balancer-manager
+</Location>
+
+ProxyPass /balancer-manager !
+ProxyPass / balancer://mycluster/
+ProxyPassReverse  / balancer://mycluster/
+
+
+
+
+
+
+
+

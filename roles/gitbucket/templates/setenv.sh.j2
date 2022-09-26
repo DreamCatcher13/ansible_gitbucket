@@ -1,0 +1,4 @@
+export GITBUCKET_HOME=/mnt/gitbucket
+export GITBUCKET_DB_URL=jdbc:postgresql://{{ hostvars['postgres']['ansible_host'] }}/gitbucket
+export GITBUCKET_DB_USER={{ dbuser }}
+export GITBUCKET_DB_PASSWORD={{ dbpass }}

@@ -1,0 +1,7 @@
+---
+dbname: gitbucket
+user1: gitbucket
+pass1: pa55word
+user2: gitbucket2
+pass2: p4ssw0rd
+# vars file for conf_psql

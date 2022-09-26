@@ -1,0 +1,54 @@
+---
+ - name: create db
+   postgresql_db:
+     state: present
+     name: "{{ dbname }}"
+   become: yes
+   become_user: postgres
+ 
+ - name: create user1
+   postgresql_user: 
+     state: present
+     name: "{{ user1 }}"
+     password: "{{ pass1 }}"
+   become: yes
+   become_user: postgres
+
+ - name: create user2
+   postgresql_user:
+     state: present
+     name: "{{ user2 }}"
+     password: "{{ pass2 }}"
+   become: yes
+   become_user: postgres
+
+ - name: copy sql script
+   copy: 
+     src: priv.sql
+     dest: /tmp/priv.sql
+     owner: postgres
+     group: postgres
+     mode: 0755
+   register: result
+ 
+ - name: grant privileges
+   become: yes
+   become_user: postgres
+   shell: "psql -f /tmp/priv.sql" 
+   when: result.changed 
+
+ - name: pgsql listen
+   lineinfile:
+     path: /var/lib/pgsql/data/postgresql.conf
+     regex: "^#listen_.*"
+     line: "listen_addresses = '*'"
+     state: present
+     backup: yes
+
+ - name: remote connect
+   template:
+     src: pg_hba.conf.j2
+     dest: /var/lib/pgsql/data/pg_hba.conf
+   notify: restart pgsql
+ 
+# tasks file for conf_psql

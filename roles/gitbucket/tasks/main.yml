@@ -1,0 +1,46 @@
+---
+ - name: stop tomcat
+   service: 
+     name: tomcat
+     state: stopped
+
+ - name: copy index.jsp
+   template:
+     src: index.jsp.j2
+     dest: /opt/tomcat/webapps/ROOT/index.jsp
+
+ - name: copy env_var file
+   template:
+     src: setenv.sh.j2
+     dest: /opt/tomcat/bin/setenv.sh
+     owner: tomcat
+     group: tomcat
+
+ - name: copy .war file
+   copy: 
+     src: gitbucket.war
+     dest: /opt/tomcat/webapps
+     owner: tomcat
+     group: tomcat
+
+ - name: start tomcat1
+   service:
+     name: tomcat
+     state: restarted
+   when: inventory_hostname == "app1"
+
+ - name: wait1
+   wait_for:
+     timeout: 100
+   become: false
+   delegate_to: localhost
+
+
+ - name: start tomcat2
+   service:
+     name: tomcat
+     state: restarted
+   when: inventory_hostname == "app2"
+
+
+# tasks file for gitbucket

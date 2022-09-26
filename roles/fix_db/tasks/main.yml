@@ -1,0 +1,14 @@
+---
+ - name: grant again
+   become: yes
+   become_user: postgres
+   shell: "psql -f /tmp/priv.sql"
+   when: inventory_hostname == "postgres"
+
+ - name: restart tomcat2
+   service:
+     name: tomcat
+     state: restarted
+   when: inventory_hostname == "app2"
+
+# tasks file for fix_db
