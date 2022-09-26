@@ -1,0 +1,6 @@
+---
+ hostname: app2
+ dbname: gitbucket
+ dbuser: gitbucket2
+ dbpass: p4ssw0rd
+ jvm: server2

@@ -1,0 +1,6 @@
+---
+ hostname: mariadb
+ dbname: zabbix
+ dbuser: zabbix
+ dbpass: password
+
