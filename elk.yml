@@ -1,0 +1,34 @@
+---
+ - name: install elk stack
+   hosts: elk
+   become: yes
+   roles:
+     - elk
+ 
+ - name: install filebeat 
+   hosts: monitoring
+   become: yes
+   roles: 
+     - filebeat
+
+ tasks:
+  - name: Install vim
+    yum: 
+      name: ['vim', 'tree']
+      state: present
+
+#  - name: install java
+#    yum: 
+#      name: ['java-1.8.0-openjdk-devel', 'java-1.8.0-openjdk']
+#      state: present
+
+  - name: copy repo file
+    copy:
+      src: /root/ansible/elasticsearch.repo
+      dest: /etc/yum.repos.d/elasticsearch.repo
+
+  - name: copy keys
+    rpm_key:
+      key: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+      state: present
+
