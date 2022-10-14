@@ -26,3 +26,13 @@ app
 db
 nfs
 lb
+
+[elk]
+elastic ansible_host=10.26.0.107
+logstash ansible_host=10.26.0.75
+kibana ansible_host=10.26.0.87
+
+[ci]
+jenkins ansible_host=10.26.0.252
+test ansible_host=10.26.0.93
+
