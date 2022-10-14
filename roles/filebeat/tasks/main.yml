@@ -1,0 +1,26 @@
+---  
+ - name: copy repo file
+   copy:
+     src: elasticsearch.repo
+     dest: /etc/yum.repos.d/elasticsearch.repo
+
+ - name: copy keys
+   rpm_key:    
+     key: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+     state: present
+ 
+ - name: install filebeat
+   yum: 
+     name: filebeat
+     state: present
+
+ - name: firewall
+   firewalld:
+     port: 5044/tcp
+     state: enabled
+     permanent: yes
+     zone: public
+     immediate: yes
+
+
+# tasks file for filebeat
