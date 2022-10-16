@@ -1,3 +1,7 @@
 ---
  log.node:  "logstash"
+ el.cluster: "Tower"
+ el.node: "el-node1"
+ 
 # vars file for elk
+
