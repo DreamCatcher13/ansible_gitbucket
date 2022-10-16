@@ -1,2 +1,117 @@
----
+---  
+ - name: Install additional packages
+   yum: 
+     name: ['vim', 'tree']
+     state: present
+
+ - name: install java
+   yum: 
+     name: ['java-1.8.0-openjdk-devel', 'java-1.8.0-openjdk']
+     state: present
+   when: inventory_hostname in ['elastic', 'logstash']
+
+  - name: copy repo file
+    copy:
+      src: /root/ansible/elasticsearch.repo
+      dest: /etc/yum.repos.d/elasticsearch.repo
+
+  - name: copy keys
+    rpm_key:
+      key: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+      state: present
+
+ - name: config elastic
+   block:
+     - name: install
+       yum:
+         name: elasticsearch
+         state: present
+
+     - name: open firewall ports
+       firewalld:
+         port: "{{ item }}"
+         permanent: yes
+         zone: public
+         state: enabled
+         immediate: yes
+       loop:
+         - 9200/tcp
+         - 9300/tcp
+
+     - name: copy config
+       template:
+         src: elasticsearch.yml.j2
+         dest: /etc/elasticsearch/elasticsearch.yml
+ 
+     - name: jvm opt
+       template:
+         src: jvm.options.j2
+         dest: /etc/elasticsearch/jvm.options
+
+     - name: service
+       service:
+         name: elasticsearch
+         state: restarted
+         enabled: yes
+   when: inventory_hostname == 'elastic'
+
+ - name: config kibana
+   block:
+     - name: install
+       yum:
+         name: kibana
+         state: present
+
+     - name: open firewall ports
+       firewalld:
+         port: 5601/tcp
+         permanent: yes
+         zone: public
+         state: enabled
+         immediate: yes
+
+     - name: copy config
+       template:
+         src: kibana.yml.j2
+         dest: /etc/kibana/kibana.yml
+ 
+     - name: service
+       service:
+         name: kibana
+         state: restarted
+         enabled: yes
+   when: inventory_hostname == 'kibana'
+
+ - name: config logstash
+   block:
+     - name: install
+       yum:
+         name: logstash
+         state: present
+
+     - name: open firewall ports
+       firewalld:
+         port: 5044/tcp
+         permanent: yes
+         zone: public
+         state: enabled
+         immediate: yes
+
+     - name: copy config
+       template:
+         src: logstash.yml.j2
+         dest: /etc/logstash/logstash.yml
+ 
+     - name: jvm opt
+       template:
+         src: jvm.options.logst.j2
+         dest: /etc/elasticsearch/jvm.options
+
+     - name: service
+       service:
+         name: logstash
+         state: restarted
+         enabled: yes
+   when: inventory_hostname == 'logstash'
+
 # tasks file for elk

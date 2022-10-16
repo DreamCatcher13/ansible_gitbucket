@@ -1,2 +1,3 @@
 ---
+ log.node:  "logstash"
 # vars file for elk
